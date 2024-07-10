@@ -2,9 +2,9 @@
 from tkinter import *
 import random
 
-GAME_WIDTH = 500
-GAME_HEIGHT = 500
-SPEED = 50
+GAME_WIDTH = 700
+GAME_HEIGHT = 700
+SPEED = 60
 SPACE_SIZE = 50
 BODY_PARTS = 3
 SNAKE_COLOR = '#00FF00'
@@ -33,7 +33,7 @@ class Food():
 
         self.coordinates = [x,y]
 
-        canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=FOOD_COLOR, tags="food")
+        canvas.create_rectangle(x, y, x + SPACE_SIZE-10, y + SPACE_SIZE-10, fill=FOOD_COLOR, tags="food")
 def next_turn(snake, food):
 
     x,y = snake.coordinates[0]
@@ -52,11 +52,24 @@ def next_turn(snake, food):
 
     snake.squares.insert(0, square)
 
-    del snake.coordinates[-1]
+    if x == food.coordinates[0] and y == food.coordinates[1]:
 
-    canvas.delete(snake.squares[-1])
+        global score
 
-    del snake.squares[-1]
+        score += 1
+
+        label.config(text="Score:{}".format(score))
+
+        canvas.delete("food")
+
+        food = Food()
+
+    else:
+        del snake.coordinates[-1]
+
+        canvas.delete(snake.squares[-1])
+
+        del snake.squares[-1]
 
     window.after(SPEED, next_turn, snake, food)
 def change_direction(new_direction):
@@ -78,7 +91,7 @@ def change_direction(new_direction):
     if new_direction == "down":
         if direction != "up":
             direction = new_direction
-def check_collisions():
+def check_collisions(snake):
     pass
 
 def game_over():
