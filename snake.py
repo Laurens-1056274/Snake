@@ -11,6 +11,7 @@ SNAKE_HEAD = '#CF9FFF'
 FOOD_COLOR = '#FF0000'
 BACKGROUND_COLOR = '#000000'
 
+
 class Snake:
     def __init__(self):
         self.body_size = BODY_PARTS
@@ -27,6 +28,9 @@ class Snake:
 
 class Food:
     def __init__(self):
+        self.place_new_food()
+
+    def place_new_food(self):
         x = random.randint(0, (GAME_WIDTH // SPACE_SIZE) - 1) * SPACE_SIZE
         y = random.randint(0, (GAME_HEIGHT // SPACE_SIZE) - 1) * SPACE_SIZE
         self.coordinates = [x, y]
@@ -55,7 +59,7 @@ def next_turn(snake, food):
         score += 1
         label.config(text="Score:{}".format(score))
         canvas.delete("food")
-        food = Food()
+        food.place_new_food()
     else:
         del snake.coordinates[-1]
         canvas.delete(snake.squares[-1])
@@ -100,7 +104,24 @@ def game_over():
     canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/3, font=('Arial', 70),
                        text="Game Over", fill='red', tags="Game Over")
     canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/2, font=('Arial', 30),
-                       text="press space bar to try again", fill='blue', tags="try again")
+                       text="Press space bar to try again", fill='blue', tags="try again")
+
+    window.bind('<space>', reset_game)
+
+def reset_game(event):
+    global snake, food, score, direction
+
+    window.bind('<space>', 'NULL')
+
+    canvas.delete(ALL)
+    score = 0
+    direction = 'down'
+    label.config(text="Score:{}".format(score))
+
+    snake = Snake()
+    food = Food()
+
+    next_turn(snake, food)
 
 window = Tk()
 window.title("Snake Game!")
