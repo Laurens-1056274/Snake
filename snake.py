@@ -26,6 +26,7 @@ class Snake:
             square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=color, tags="snake")
             self.squares.append(square)
 
+
 class Food:
     def __init__(self):
         self.place_new_food()
@@ -35,6 +36,7 @@ class Food:
         y = random.randint(0, (GAME_HEIGHT // SPACE_SIZE) - 1) * SPACE_SIZE
         self.coordinates = [x, y]
         self.food_item = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=FOOD_COLOR, tags="food")
+
 
 def next_turn(snake, food):
     x, y = snake.coordinates[0]
@@ -51,7 +53,7 @@ def next_turn(snake, food):
     snake.coordinates.insert(0, (x, y))
 
     # Change the color of the new head to SNAKE_HEAD color
-    square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_HEAD)
+    square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_HEAD, tags="snake")
     snake.squares.insert(0, square)
 
     if x == food.coordinates[0] and y == food.coordinates[1]:
@@ -91,18 +93,17 @@ def change_direction(new_direction):
 def check_collisions(snake):
     x, y = snake.coordinates[0]
     global GAME_WIDTH, GAME_HEIGHT, SPACE_SIZE
-
     # Wrap horizontally
     if x < 0:
-        x = GAME_WIDTH # Wrap around to the right side
+        x = GAME_WIDTH - SPACE_SIZE  # Wrap around to the right side
     elif x >= GAME_WIDTH:
-        x = - SPACE_SIZE  # Wrap around to the left side
+        x = 0  # Wrap around to the left side
 
     # Wrap vertically
     if y < 0:
-        y = GAME_HEIGHT  # Wrap around to the bottom
+        y = GAME_HEIGHT - SPACE_SIZE  # Wrap around to the bottom
     elif y >= GAME_HEIGHT:
-        y = - SPACE_SIZE  # Wrap around to the top
+        y = 0  # Wrap around to the top
 
     # Update the coordinates in the snake object
     snake.coordinates[0] = (x, y)
@@ -114,17 +115,41 @@ def check_collisions(snake):
 
     return False
 
+
+def slowed():
+    global SNAKE_COLOR, SNAKE_HEAD, FOOD_COLOR, BACKGROUND_COLOR
+
+    SNAKE_COLOR = '#FF0000'
+    SNAKE_HEAD = '#CF9FFF'
+    FOOD_COLOR = '#00FF00'
+    BACKGROUND_COLOR = '#000000'
+
+    # Update the background color
+    canvas.config(bg=BACKGROUND_COLOR)
+
+    # Update snake colors
+    for i, square in enumerate(snake.squares):
+        color = SNAKE_HEAD if i == 0 else SNAKE_COLOR
+        canvas.itemconfig(square, fill=color)
+
+    # Update food color
+    canvas.itemconfig(food.food_item, fill=FOOD_COLOR)
+
+    print("Colors updated!")
+
+
 def game_over():
     canvas.delete(ALL)
     canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/3, font=('Arial', 70),
-                       text="Game Over", fill='red', tags="Game Over")
+                       text="Game Over", fill='white', tags="Game Over")
     canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/2, font=('Arial', 30),
-                       text="Press space bar to try again", fill='blue', tags="try again")
+                       text="Press space bar to try again", fill='white', tags="try again")
 
-    canvas.create_text(100,50, font=('Arial', 16),
+    canvas.create_text(100, 50, font=('Arial', 16),
                        text=f'Score = {score}', fill='white', tags="your_score")
 
     window.bind('<space>', reset_game)
+
 
 def reset_game(event):
     global snake, food, score, direction
@@ -139,6 +164,7 @@ def reset_game(event):
     food = Food()
 
     next_turn(snake, food)
+
 
 window = Tk()
 window.title("Snake Game!")
@@ -162,6 +188,7 @@ y = int((screen_height / 2) - (window_height / 2))
 
 window.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
+window.bind('<j>', lambda event: slowed())
 for key in ('<Left>', 'a', 'A'): window.bind(key, lambda event: change_direction('left'))
 for key in ('<Right>', 'd', 'D'): window.bind(key, lambda event: change_direction('right'))
 for key in ('<Up>', 'w', 'W'): window.bind(key, lambda event: change_direction('up'))
