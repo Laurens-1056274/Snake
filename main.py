@@ -3,15 +3,13 @@ import random
 
 GAME_WIDTH = 1440
 GAME_HEIGHT = 600
-SPEED = 80
+SPEED = 90
 SPACE_SIZE = 50
 BODY_PARTS = 3
 SNAKE_COLOR = '#00FF00'
-SNAKE_HEAD = '#FFA500'
+SNAKE_HEAD = '#CF9FFF'
 FOOD_COLOR = '#FF0000'
 BACKGROUND_COLOR = '#000000'
-
-
 
 class Snake:
     def __init__(self):
@@ -22,8 +20,9 @@ class Snake:
         for i in range(0, BODY_PARTS):
             self.coordinates.append([0, 0])
 
-        for x, y in self.coordinates:
-            square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_COLOR, tags="snake")
+        for i, (x, y) in enumerate(self.coordinates):
+            color = SNAKE_HEAD if i == 0 else SNAKE_COLOR
+            square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=color, tags="snake")
             self.squares.append(square)
 
 class Food:
@@ -32,6 +31,7 @@ class Food:
         y = random.randint(0, (GAME_HEIGHT // SPACE_SIZE) - 1) * SPACE_SIZE
         self.coordinates = [x, y]
         self.food_item = canvas.create_rectangle(x, y, x + SPACE_SIZE - 10, y + SPACE_SIZE - 10, fill=FOOD_COLOR, tags="food")
+
 def next_turn(snake, food):
     x, y = snake.coordinates[0]
 
@@ -46,7 +46,8 @@ def next_turn(snake, food):
 
     snake.coordinates.insert(0, (x, y))
 
-    square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_COLOR)
+    # Change the color of the new head to SNAKE_HEAD color
+    square = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_HEAD)
     snake.squares.insert(0, square)
 
     if x == food.coordinates[0] and y == food.coordinates[1]:
@@ -60,10 +61,14 @@ def next_turn(snake, food):
         canvas.delete(snake.squares[-1])
         del snake.squares[-1]
 
+    # Change the color of the previous head back to SNAKE_COLOR
+    canvas.itemconfig(snake.squares[1], fill=SNAKE_COLOR)
+
     if check_collisions(snake):
         game_over()
     else:
         window.after(SPEED, next_turn, snake, food)
+
 def change_direction(new_direction):
     global direction
 
@@ -75,8 +80,8 @@ def change_direction(new_direction):
         direction = new_direction
     elif new_direction == "down" and direction != "up":
         direction = new_direction
-def check_collisions(snake):
 
+def check_collisions(snake):
     x, y = snake.coordinates[0]
 
     if x < 0 or x >= GAME_WIDTH:
@@ -84,15 +89,11 @@ def check_collisions(snake):
     elif y < 0 or y >= GAME_HEIGHT:
         return True
 
-
     for body_part in snake.coordinates[1:]:
         if x == body_part[0] and y == body_part[1]:
-
             return True
 
-
     return False
-
 
 def game_over():
     canvas.delete(ALL)
