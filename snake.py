@@ -11,6 +11,12 @@ SNAKE_HEAD = '#CF9FFF'
 FOOD_COLOR = '#FF0000'
 BACKGROUND_COLOR = '#000000'
 
+ORIGINAL_SPEED = SPEED
+ORIGINAL_SNAKE_COLOR = SNAKE_COLOR
+ORIGINAL_SNAKE_HEAD = SNAKE_HEAD
+ORIGINAL_FOOD_COLOR = FOOD_COLOR
+
+
 
 class Snake:
     def __init__(self):
@@ -60,7 +66,8 @@ def next_turn(snake, food):
         global score
         score += 1
         canvas.delete("score_text")
-        canvas.create_text(10, 10, anchor="nw", text="Score: {}".format(score), fill="white", font=("Arial", 16), tags="score_text")
+        canvas.create_text(10, 10, anchor="nw", text="Score: {}".format(score), fill="white", font=("Arial", 16),
+                           tags="score_text")
         canvas.delete("food")
         food.place_new_food()
     else:
@@ -95,13 +102,13 @@ def check_collisions(snake):
     global GAME_WIDTH, GAME_HEIGHT, SPACE_SIZE
     # Wrap horizontally
     if x < 0:
-        x = GAME_WIDTH - SPACE_SIZE  # Wrap around to the right side
+        x = GAME_WIDTH # Wrap around to the right side
     elif x >= GAME_WIDTH:
         x = 0  # Wrap around to the left side
 
     # Wrap vertically
     if y < 0:
-        y = GAME_HEIGHT - SPACE_SIZE  # Wrap around to the bottom
+        y = GAME_HEIGHT  # Wrap around to the bottom
     elif y >= GAME_HEIGHT:
         y = 0  # Wrap around to the top
 
@@ -117,12 +124,12 @@ def check_collisions(snake):
 
 
 def slowed():
-    global SNAKE_COLOR, SNAKE_HEAD, FOOD_COLOR, BACKGROUND_COLOR
+    global SNAKE_COLOR, SNAKE_HEAD, FOOD_COLOR, BACKGROUND_COLOR, SPEED
+    SPEED = SPEED * 2
+    SNAKE_COLOR = '#FF00FF'
+    SNAKE_HEAD = '#306000'
+    FOOD_COLOR = '#00FFFF'
 
-    SNAKE_COLOR = '#FF0000'
-    SNAKE_HEAD = '#CF9FFF'
-    FOOD_COLOR = '#00FF00'
-    BACKGROUND_COLOR = '#000000'
 
     # Update the background color
     canvas.config(bg=BACKGROUND_COLOR)
@@ -135,14 +142,37 @@ def slowed():
     # Update food color
     canvas.itemconfig(food.food_item, fill=FOOD_COLOR)
 
-    print("Colors updated!")
+    # Schedule the color reset after 3 seconds
+    window.after(3000, reset_colors)
+
+
+def reset_colors():
+    global SNAKE_COLOR, SNAKE_HEAD, FOOD_COLOR, BACKGROUND_COLOR, SPEED
+
+    SPEED = ORIGINAL_SPEED
+    SNAKE_COLOR = ORIGINAL_SNAKE_COLOR
+    SNAKE_HEAD = ORIGINAL_SNAKE_HEAD
+    FOOD_COLOR = ORIGINAL_FOOD_COLOR
+
+    # Update the background color
+    canvas.config(bg=BACKGROUND_COLOR)
+
+    # Update snake colors
+    for i, square in enumerate(snake.squares):
+        color = SNAKE_HEAD if i == 0 else SNAKE_COLOR
+        canvas.itemconfig(square, fill=color)
+
+    # Update food color
+    canvas.itemconfig(food.food_item, fill=FOOD_COLOR)
+
+
 
 
 def game_over():
     canvas.delete(ALL)
-    canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/3, font=('Arial', 70),
+    canvas.create_text(canvas.winfo_width() / 2, canvas.winfo_height() / 3, font=('Arial', 70),
                        text="Game Over", fill='white', tags="Game Over")
-    canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/2, font=('Arial', 30),
+    canvas.create_text(canvas.winfo_width() / 2, canvas.winfo_height() / 2, font=('Arial', 30),
                        text="Press space bar to try again", fill='white', tags="try again")
 
     canvas.create_text(100, 50, font=('Arial', 16),
