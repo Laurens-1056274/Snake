@@ -87,14 +87,27 @@ def change_direction(new_direction):
     elif new_direction == "down" and direction != "up":
         direction = new_direction
 
+
 def check_collisions(snake):
     x, y = snake.coordinates[0]
+    global GAME_WIDTH, GAME_HEIGHT, SPACE_SIZE
 
-    if x < 0 or x >= GAME_WIDTH:
-        return True
-    elif y < 0 or y >= GAME_HEIGHT:
-        return True
+    # Wrap horizontally
+    if x < 0:
+        x = GAME_WIDTH # Wrap around to the right side
+    elif x >= GAME_WIDTH:
+        x = - SPACE_SIZE  # Wrap around to the left side
 
+    # Wrap vertically
+    if y < 0:
+        y = GAME_HEIGHT  # Wrap around to the bottom
+    elif y >= GAME_HEIGHT:
+        y = - SPACE_SIZE  # Wrap around to the top
+
+    # Update the coordinates in the snake object
+    snake.coordinates[0] = (x, y)
+
+    # Check for collisions with the snake's body
     for body_part in snake.coordinates[1:]:
         if x == body_part[0] and y == body_part[1]:
             return True
