@@ -1,7 +1,7 @@
 from tkinter import *
 import random
 
-GAME_WIDTH = 1440
+GAME_WIDTH = 800
 GAME_HEIGHT = 600
 SPEED = 90
 SPACE_SIZE = 50
@@ -34,7 +34,7 @@ class Food:
         x = random.randint(0, (GAME_WIDTH // SPACE_SIZE) - 1) * SPACE_SIZE
         y = random.randint(0, (GAME_HEIGHT // SPACE_SIZE) - 1) * SPACE_SIZE
         self.coordinates = [x, y]
-        self.food_item = canvas.create_rectangle(x, y, x + SPACE_SIZE - 10, y + SPACE_SIZE - 10, fill=FOOD_COLOR, tags="food")
+        self.food_item = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=FOOD_COLOR, tags="food")
 
 def next_turn(snake, food):
     x, y = snake.coordinates[0]
@@ -57,7 +57,8 @@ def next_turn(snake, food):
     if x == food.coordinates[0] and y == food.coordinates[1]:
         global score
         score += 1
-        label.config(text="Score:{}".format(score))
+        canvas.delete("score_text")
+        canvas.create_text(10, 10, anchor="nw", text="Score: {}".format(score), fill="white", font=("Arial", 16), tags="score_text")
         canvas.delete("food")
         food.place_new_food()
     else:
@@ -72,6 +73,7 @@ def next_turn(snake, food):
         game_over()
     else:
         window.after(SPEED, next_turn, snake, food)
+
 
 def change_direction(new_direction):
     global direction
@@ -106,6 +108,9 @@ def game_over():
     canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/2, font=('Arial', 30),
                        text="Press space bar to try again", fill='blue', tags="try again")
 
+    canvas.create_text(100,50, font=('Arial', 16),
+                       text=f'Score = {score}', fill='white', tags="your_score")
+
     window.bind('<space>', reset_game)
 
 def reset_game(event):
@@ -116,7 +121,6 @@ def reset_game(event):
     canvas.delete(ALL)
     score = 0
     direction = 'down'
-    label.config(text="Score:{}".format(score))
 
     snake = Snake()
     food = Food()
@@ -129,9 +133,6 @@ window.resizable(False, False)
 
 score = 0
 direction = 'down'
-
-label = Label(window, text='Score:{}'.format(score), font=('Arial', 40))
-label.pack()
 
 canvas = Canvas(window, bg=BACKGROUND_COLOR, height=GAME_HEIGHT, width=GAME_WIDTH)
 canvas.pack()
