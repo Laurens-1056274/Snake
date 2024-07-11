@@ -104,13 +104,13 @@ def check_collisions(snake):
     if x < 0:
         x = GAME_WIDTH # Wrap around to the right side
     elif x >= GAME_WIDTH:
-        x = 0  # Wrap around to the left side
+        x = -SPACE_SIZE  # Wrap around to the left side
 
     # Wrap vertically
     if y < 0:
         y = GAME_HEIGHT  # Wrap around to the bottom
     elif y >= GAME_HEIGHT:
-        y = 0  # Wrap around to the top
+        y = -SPACE_SIZE  # Wrap around to the top
 
     # Update the coordinates in the snake object
     snake.coordinates[0] = (x, y)
