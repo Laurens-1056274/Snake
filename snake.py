@@ -104,15 +104,22 @@ def check_collisions(snake):
     global GAME_WIDTH, GAME_HEIGHT, SPACE_SIZE
     # Wrap horizontally
     if x < 0:
+        print('lower than x = 0')
         x = GAME_WIDTH - SPACE_SIZE  # Wrap around to the right side
-    elif x >= GAME_WIDTH:
+    elif x >= GAME_WIDTH + SPACE_SIZE:
+        print('bigger than x = game_widht')
         x = 0  # Wrap around to the left side
 
     # Wrap vertically
     if y < 0:
+        print('lower than y = 0')
         y = GAME_HEIGHT - SPACE_SIZE  # Wrap around to the bottom
     elif y >= GAME_HEIGHT:
+        print('bigger than y = game_height')
         y = 0  # Wrap around to the top
+
+
+
 
     # Update the coordinates in the snake object
     snake.coordinates[0] = (x, y)
