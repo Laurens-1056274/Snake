@@ -10,6 +10,8 @@ SNAKE_COLOR = '#00FF00'
 SNAKE_HEAD = '#CF9FFF'
 FOOD_COLOR = '#FF0000'
 BACKGROUND_COLOR = '#000000'
+BORDER_COLOR = '#808080'
+BORDER_WIDTH = 1
 
 ORIGINAL_SPEED = SPEED
 ORIGINAL_SNAKE_COLOR = SNAKE_COLOR
@@ -40,9 +42,14 @@ class Food:
         self.place_new_food()
 
     def place_new_food(self):
-        x = random.randint(0, (GAME_WIDTH // SPACE_SIZE) - 1) * SPACE_SIZE
-        y = random.randint(0, (GAME_HEIGHT // SPACE_SIZE) - 1) * SPACE_SIZE
-        self.coordinates = [x, y]
+        while True:
+            x = random.randint(1, (GAME_WIDTH // SPACE_SIZE) - 2) * SPACE_SIZE
+            y = random.randint(1, (GAME_HEIGHT // SPACE_SIZE) - 2) * SPACE_SIZE
+            self.coordinates = [x, y]
+
+            if self.coordinates not in snake.coordinates:
+                break
+
         self.food_item = canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=FOOD_COLOR, tags="food")
 
 
@@ -57,6 +64,16 @@ def next_turn(snake, food):
         x -= SPACE_SIZE
     elif direction == "right":
         x += SPACE_SIZE
+
+    # Wrap around using the border as teleport pads
+    if x < 0:
+        x = GAME_WIDTH - SPACE_SIZE
+    elif x >= GAME_WIDTH:
+        x = 0
+    if y < 0:
+        y = GAME_HEIGHT - SPACE_SIZE
+    elif y >= GAME_HEIGHT:
+        y = 0
 
     snake.coordinates.insert(0, (x, y))
 
@@ -101,28 +118,6 @@ def change_direction(new_direction):
 
 def check_collisions(snake):
     x, y = snake.coordinates[0]
-    global GAME_WIDTH, GAME_HEIGHT, SPACE_SIZE
-    # Wrap horizontally
-    if x < 0:
-        print('lower than x = 0')
-        x = GAME_WIDTH - SPACE_SIZE  # Wrap around to the right side
-    elif x >= GAME_WIDTH + SPACE_SIZE:
-        print('bigger than x = game_widht')
-        x = 0  # Wrap around to the left side
-
-    # Wrap vertically
-    if y < 0:
-        print('lower than y = 0')
-        y = GAME_HEIGHT - SPACE_SIZE  # Wrap around to the bottom
-    elif y >= GAME_HEIGHT:
-        print('bigger than y = game_height')
-        y = 0  # Wrap around to the top
-
-
-
-
-    # Update the coordinates in the snake object
-    snake.coordinates[0] = (x, y)
 
     # Check for collisions with the snake's body
     for body_part in snake.coordinates[1:]:
@@ -162,6 +157,11 @@ def update_timer(time_left, mode):
         canvas.create_text(GAME_WIDTH - 50, 10, anchor="ne", text="{}: {}".format(mode, time_left), fill="white",
                            font=("Arial", 16), tags="timer_text")
         window.after(1000, update_timer, time_left - 1, mode)
+    else:
+        canvas.delete("timer_text")
+        if mode == "Cooldown":
+            canvas.create_text(GAME_WIDTH - 50, 10, anchor="ne", text="Cooldown: None (j)", fill="white",
+                               font=("Arial", 16), tags="timer_text")
 
 
 def start_cooldown():
@@ -176,6 +176,8 @@ def end_cooldown():
     global slowed_active
     slowed_active = False
     canvas.delete("timer_text")
+    canvas.create_text(GAME_WIDTH - 50, 10, anchor="ne", text="Cooldown: None (j)", fill="white",
+                       font=("Arial", 16), tags="timer_text")
 
 
 def reset_colors():
@@ -213,6 +215,7 @@ def reset_game(event):
     window.bind('<space>', 'NULL')
 
     canvas.delete(ALL)
+    draw_border()
     score = 0
     direction = 'down'
 
@@ -220,6 +223,11 @@ def reset_game(event):
     food = Food()
 
     next_turn(snake, food)
+
+
+def draw_border():
+    canvas.create_rectangle(BORDER_WIDTH, BORDER_WIDTH, GAME_WIDTH - BORDER_WIDTH, GAME_HEIGHT - BORDER_WIDTH,
+                            outline=BORDER_COLOR, width=BORDER_WIDTH)
 
 
 window = Tk()
@@ -252,6 +260,13 @@ for key in ('<Down>', 's', 'S'): window.bind(key, lambda event: change_direction
 
 snake = Snake()
 food = Food()
+
+# Display the initial cooldown text
+canvas.create_text(GAME_WIDTH - 50, 10, anchor="ne", text="Cooldown: None (j)", fill="white",
+                   font=("Arial", 16), tags="timer_text")
+
+# Draw the border
+draw_border()
 
 next_turn(snake, food)
 
