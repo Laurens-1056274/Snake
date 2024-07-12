@@ -16,7 +16,9 @@ ORIGINAL_SNAKE_COLOR = SNAKE_COLOR
 ORIGINAL_SNAKE_HEAD = SNAKE_HEAD
 ORIGINAL_FOOD_COLOR = FOOD_COLOR
 
-
+slowed_active = False
+slowed_timer = 3  # in seconds
+cooldown_timer = 5  # in seconds
 
 class Snake:
     def __init__(self):
@@ -102,15 +104,15 @@ def check_collisions(snake):
     global GAME_WIDTH, GAME_HEIGHT, SPACE_SIZE
     # Wrap horizontally
     if x < 0:
-        x = GAME_WIDTH # Wrap around to the right side
+        x = GAME_WIDTH - SPACE_SIZE  # Wrap around to the right side
     elif x >= GAME_WIDTH:
-        x = -SPACE_SIZE  # Wrap around to the left side
+        x = 0  # Wrap around to the left side
 
     # Wrap vertically
     if y < 0:
-        y = GAME_HEIGHT  # Wrap around to the bottom
+        y = GAME_HEIGHT - SPACE_SIZE  # Wrap around to the bottom
     elif y >= GAME_HEIGHT:
-        y = -SPACE_SIZE  # Wrap around to the top
+        y = 0  # Wrap around to the top
 
     # Update the coordinates in the snake object
     snake.coordinates[0] = (x, y)
@@ -124,39 +126,58 @@ def check_collisions(snake):
 
 
 def slowed():
-    global SNAKE_COLOR, SNAKE_HEAD, FOOD_COLOR, BACKGROUND_COLOR, SPEED
-    SPEED = SPEED * 2
-    SNAKE_COLOR = '#FF00FF'
-    SNAKE_HEAD = '#306000'
-    FOOD_COLOR = '#00FFFF'
+    global SNAKE_COLOR, SNAKE_HEAD, FOOD_COLOR, SPEED, slowed_active, slowed_timer
+    if not slowed_active:
+        slowed_active = True
+        SPEED = SPEED * 2
+        SNAKE_COLOR = '#FF00FF'
+        SNAKE_HEAD = '#306000'
+        FOOD_COLOR = '#00FFFF'
+
+        # Update snake colors
+        for i, square in enumerate(snake.squares):
+            color = SNAKE_HEAD if i == 0 else SNAKE_COLOR
+            canvas.itemconfig(square, fill=color)
+
+        # Update food color
+        canvas.itemconfig(food.food_item, fill=FOOD_COLOR)
+
+        # Display the timer on the canvas
+        update_timer(slowed_timer, "Slowed")
+
+        # Schedule the color reset after the slowed_timer duration
+        window.after(slowed_timer * 1000, start_cooldown)
 
 
-    # Update the background color
-    canvas.config(bg=BACKGROUND_COLOR)
+def update_timer(time_left, mode):
+    if time_left > 0:
+        canvas.delete("timer_text")
+        canvas.create_text(GAME_WIDTH - 50, 10, anchor="ne", text="{}: {}".format(mode, time_left), fill="white",
+                           font=("Arial", 16), tags="timer_text")
+        window.after(1000, update_timer, time_left - 1, mode)
 
-    # Update snake colors
-    for i, square in enumerate(snake.squares):
-        color = SNAKE_HEAD if i == 0 else SNAKE_COLOR
-        canvas.itemconfig(square, fill=color)
 
-    # Update food color
-    canvas.itemconfig(food.food_item, fill=FOOD_COLOR)
+def start_cooldown():
+    global slowed_active, cooldown_timer
+    slowed_active = True  # Keep the flag true during cooldown
+    reset_colors()  # Reset colors and speed
+    update_timer(cooldown_timer, "Cooldown")
+    window.after(cooldown_timer * 1000, end_cooldown)
 
-    # Schedule the color reset after 3 seconds
-    window.after(3000, reset_colors)
+
+def end_cooldown():
+    global slowed_active
+    slowed_active = False
+    canvas.delete("timer_text")
 
 
 def reset_colors():
-    global SNAKE_COLOR, SNAKE_HEAD, FOOD_COLOR, BACKGROUND_COLOR, SPEED
-
+    global SNAKE_COLOR, SNAKE_HEAD, FOOD_COLOR, SPEED
     SPEED = ORIGINAL_SPEED
     SNAKE_COLOR = ORIGINAL_SNAKE_COLOR
     SNAKE_HEAD = ORIGINAL_SNAKE_HEAD
     FOOD_COLOR = ORIGINAL_FOOD_COLOR
 
-    # Update the background color
-    canvas.config(bg=BACKGROUND_COLOR)
-
     # Update snake colors
     for i, square in enumerate(snake.squares):
         color = SNAKE_HEAD if i == 0 else SNAKE_COLOR
@@ -164,8 +185,6 @@ def reset_colors():
 
     # Update food color
     canvas.itemconfig(food.food_item, fill=FOOD_COLOR)
-
-
 
 
 def game_over():
