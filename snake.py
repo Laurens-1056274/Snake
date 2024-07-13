@@ -12,15 +12,14 @@ FOOD_COLOR = '#FF0000'
 BACKGROUND_COLOR = '#000000'
 BORDER_COLOR = '#808080'
 BORDER_WIDTH = 1
-
 ORIGINAL_SPEED = SPEED
 ORIGINAL_SNAKE_COLOR = SNAKE_COLOR
 ORIGINAL_SNAKE_HEAD = SNAKE_HEAD
 ORIGINAL_FOOD_COLOR = FOOD_COLOR
-
 slowed_active = False
 slowed_timer = 3  # in seconds
 cooldown_timer = 5  # in seconds
+
 
 class Snake:
     def __init__(self):
@@ -55,7 +54,6 @@ class Food:
 
 def next_turn(snake, food):
     x, y = snake.coordinates[0]
-
     if direction == "up":
         y -= SPACE_SIZE
     elif direction == "down":
@@ -64,7 +62,6 @@ def next_turn(snake, food):
         x -= SPACE_SIZE
     elif direction == "right":
         x += SPACE_SIZE
-
     # Wrap around using the border as teleport pads
     if x < 0:
         x = GAME_WIDTH - SPACE_SIZE
@@ -257,17 +254,12 @@ for key in ('<Left>', 'a', 'A'): window.bind(key, lambda event: change_direction
 for key in ('<Right>', 'd', 'D'): window.bind(key, lambda event: change_direction('right'))
 for key in ('<Up>', 'w', 'W'): window.bind(key, lambda event: change_direction('up'))
 for key in ('<Down>', 's', 'S'): window.bind(key, lambda event: change_direction('down'))
-
 snake = Snake()
 food = Food()
-
 # Display the initial cooldown text
 canvas.create_text(GAME_WIDTH - 50, 10, anchor="ne", text="Cooldown: None (j)", fill="white",
                    font=("Arial", 16), tags="timer_text")
-
 # Draw the border
 draw_border()
-
 next_turn(snake, food)
-
 window.mainloop()
